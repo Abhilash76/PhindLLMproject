@@ -1,0 +1,26 @@
+Checking if GPU available
+
+Mount Google Drive
+
+Check the present working directory
+
+We use LexRank summarizer from the python package 'sumy' 
+
+LexRank Summarization
+
+Read test data
+
+Installing Transformers package
+
+Extract the finetuned model (PLEASE UPLOAD THE MODEL ZIP FILE TO GOOGLE DRIVE FIRST)
+
+Loading the finetuned pretrained model
+
+Method to retain the first sentence if the generated summary is more than a single sentence
+
+Store generated one-sentence conclusions
+
+Write the output to "output.json" file
+
+Download output.json
+

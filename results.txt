@@ -1,26 +1,79 @@
-Checking if GPU available
+!/usr/local/cuda/bin/nvcc --version
 
-Mount Google Drive
+!nvidia-smi
+from google.colab import drive
+drive.mount('/content/drive')
+!pwd
+!pip install sumy
+import nltk
+nltk.download('punkt')
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.lex_rank import LexRankSummarizer
 
-Check the present working directory
+lex_rank_summarizer = LexRankSummarizer()
 
-We use LexRank summarizer from the python package 'sumy' 
+def summarize(text):
+    summary = []
+    parser = PlaintextParser.from_string(text,Tokenizer("english"))
+    lexrank_summary = lex_rank_summarizer(parser.document,sentences_count=3)
+    for sentence in lexrank_summary:
+        summary.append(sentence._text)
+    return " ".join(summary)
+import json
+import pandas as pd
+pd.options.mode.chained_assignment = None
 
-LexRank Summarization
+with open('/content/drive/My Drive/CA4/data/valid_data.json') as json_file: #absolute or relative path to test data file
+    val_data = json.load(json_file)
+    
+val = pd.DataFrame()
+val_record = []
 
-Read test data
+for record in val_data:
+    ID = record['id']
+    args = record['argument']
+    gold_con = record['conclusion']
+    val_record.append([ID, args, gold_con])
+    
+val = val.append(val_record)
+val.columns = ['ID','argument','gold_conclusion']
+for i in range(len(val['argument'])):
+    val['argument'][i] = summarize(val['argument'][i])
+!pip install Sentencepiece 
+!pip install transformers
+import gc
+gc.collect()
+!unzip /content/drive/My\ Drive/CA4/final_model.zip #absolute path to model zip file [IMP. "My\ Drive" stands for "My Drive"]
+from transformers import BartForConditionalGeneration, BartTokenizerFast, Trainer, TrainingArguments
+import torch
 
-Installing Transformers package
+src_text = val['argument'].tolist()
 
-Extract the finetuned model (PLEASE UPLOAD THE MODEL ZIP FILE TO GOOGLE DRIVE FIRST)
-
-Loading the finetuned pretrained model
-
-Method to retain the first sentence if the generated summary is more than a single sentence
-
-Store generated one-sentence conclusions
-
-Write the output to "output.json" file
-
-Download output.json
-
+torch_device = 'cuda' if torch.cuda.is_available() else 'cpu'
+args_model = BartForConditionalGeneration.from_pretrained("models/final_model").to(torch_device)
+tokenizer = BartTokenizerFast.from_pretrained("models/final_model")
+tgt_text = []
+for txt in src_text:
+    batch = tokenizer(txt, truncation=True, padding='longest', return_tensors="pt").to(torch_device)
+    translated = args_model.generate(**batch).to(torch_device)
+    pred = tokenizer.batch_decode(translated, skip_special_tokens=True)
+    tgt_text.append(pred[0])
+import spacy
+nlp = spacy.load("en_core_web_sm")
+def return_conclusion(txt):
+  doc = nlp(txt)
+  first_sentence = ''
+  for sent in doc.sents:
+    first_sentence = sent.text
+    break
+  return first_sentence
+val['pred_conclusion'] = tgt_text
+for i in range(len(val['pred_conclusion'])):
+  val['pred_conclusion'][i] = return_conclusion(val['pred_conclusion'][i])
+val = val.drop(['argument','gold_conclusion'], axis=1)
+val = val.set_index('ID')
+with open('./output.json', 'w', encoding='utf-8') as f: #path to output.json file
+  json.dump(val.to_dict()['pred_conclusion'], f, indent=4)
+from google.colab import files
+files.download("./output.json")

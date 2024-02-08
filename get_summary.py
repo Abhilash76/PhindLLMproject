@@ -22,7 +22,7 @@ def extract_text_from_notebook(notebook_path, flag):
 
 # Example usage
 notebook_path = "C:\\Users\\Abhilash\\Downloads\\Assignment4_Lannisters\\CA4\\Evaluation.ipynb"
-notebook_text = extract_text_from_notebook(notebook_path, 'markdown')
+notebook_text = extract_text_from_notebook(notebook_path, 'code')
 # Specify the file path
 file_path = "results.txt"
 # Open the file in write mode

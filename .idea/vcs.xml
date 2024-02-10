@@ -3,7 +3,5 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/llama-cpp-python" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/llama-cpp-python/vendor/llama.cpp" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/llama-cpp-python/vendor/llama.cpp/kompute" vcs="Git" />
   </component>
 </project>

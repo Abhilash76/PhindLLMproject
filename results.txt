@@ -26,7 +26,7 @@ pd.options.mode.chained_assignment = None
 
 with open('/content/drive/My Drive/CA4/data/valid_data.json') as json_file: #absolute or relative path to test data file
     val_data = json.load(json_file)
-    
+
 val = pd.DataFrame()
 val_record = []
 
@@ -35,12 +35,12 @@ for record in val_data:
     args = record['argument']
     gold_con = record['conclusion']
     val_record.append([ID, args, gold_con])
-    
+
 val = val.append(val_record)
 val.columns = ['ID','argument','gold_conclusion']
 for i in range(len(val['argument'])):
     val['argument'][i] = summarize(val['argument'][i])
-!pip install Sentencepiece 
+!pip install Sentencepiece
 !pip install transformers
 import gc
 gc.collect()

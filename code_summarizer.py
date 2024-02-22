@@ -4,6 +4,7 @@ from transformers import (
     AutoConfig,
     pipeline,
 )
+import torch
 
 model_name = "sagard21/python-code-explainer"
 
@@ -15,7 +16,13 @@ config = AutoConfig.from_pretrained(model_name)
 
 model.eval()
 
-pipe = pipeline("summarization", model=model_name, config=config, tokenizer=tokenizer, max_length=1024)
+pipe = pipeline("summarization",
+                model=model_name,
+                config=config,
+                tokenizer=tokenizer,
+                max_length=1024,
+                torch_dtype=torch.float32,
+                device_map="auto")
 
 # Specify the path to the file
 file_path = "results.txt"

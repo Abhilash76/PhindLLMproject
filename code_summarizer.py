@@ -1,18 +1,12 @@
-from transformers import (
-    AutoModelForSeq2SeqLM,
-    AutoTokenizer,
-    AutoConfig,
-    pipeline,
-)
 import torch
+from transformers import AutoTokenizer, T5ForConditionalGeneration, pipeline
 
-model_name = "sagard21/python-code-explainer"
+model_name = "Salesforce/codet5-large"
+tokenizer = AutoTokenizer.from_pretrained("Salesforce/codet5-large")
+model = T5ForConditionalGeneration.from_pretrained("Salesforce/codet5-large")
 
-tokenizer = AutoTokenizer.from_pretrained(model_name, padding=True)
 
-model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-
-config = AutoConfig.from_pretrained(model_name)
+config = "model"
 
 model.eval()
 
@@ -36,4 +30,8 @@ if len(text_content) > 512:
 
 raw_code = text_content
 
-print(pipe(raw_code)[0]["summary_text"])
+input_ids = tokenizer(raw_code, return_tensors="pt").input_ids
+
+# simply generate a single sequence
+generated_ids = model.generate(input_ids, max_length=1024)
+print(tokenizer.decode(generated_ids[0], skip_special_tokens=True))
